@@ -1,0 +1,6 @@
+services:
+  app:
+    build: . # Build the image from the Dockerfile
+    volumes:
+      - ./:/app # Mount your project
+    working_dir: /app

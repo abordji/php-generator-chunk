@@ -1,0 +1,6 @@
+grumphp:
+    ascii: ~
+    tasks:
+        phpcsfixer:
+            diff: true
+        phpunit: ~
