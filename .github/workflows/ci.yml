@@ -1,0 +1,48 @@
+# Workflow name (displayed on GitHub)
+name: PHP CI Checks
+
+# Triggers: when to run this workflow
+on:
+  # Run on pushes to the main branch (e.g., main)
+  push:
+    branches: [ main ]
+  # Run on Pull Requests targeting the main branch
+  pull_request:
+    branches: [ main ]
+
+# Defines the jobs to run
+jobs:
+  # Unique job ID
+  php-checks:
+    # Job name (displayed on GitHub)
+    name: Run PHPUnit & PHP-CS-Fixer
+    # Type of virtual machine to run the job on
+    runs-on: ubuntu-latest
+
+    # Sequence of steps to execute in this job
+    steps:
+      # Step 1: Check out repository code
+      - name: Checkout code
+        uses: actions/checkout@v4 # Standard action to clone the repository
+
+      # Step 2: Set up Docker Buildx (for better Docker builds)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 3: Build the Docker image via make (uses cache if possible)
+      # Ensures the base environment is ready.
+      - name: Build Docker Image
+        run: make build # Uses the make target to build the Docker image
+
+      # Step 4: Install Composer dependencies inside the container
+      # Needed even if 'composer install' is in Dockerfile, due to volume mounts overwriting the image's vendor dir.
+      - name: Install Composer Dependencies
+        run: make install # Ensures vendor/ directory is present at runtime in the mounted volume
+
+      # Step 5: Check code style (PHP CS Fixer in dry-run)
+      - name: Check Code Style (PHP CS Fixer)
+        run: make cs-check # Executes the check-style make target (using --dry-run)
+
+      # Step 6: Run tests (PHPUnit)
+      - name: Run Tests (PHPUnit)
+        run: make test # Executes the make target for tests
